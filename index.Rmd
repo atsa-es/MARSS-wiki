@@ -12,10 +12,19 @@ description: "This is a wiki for MARSS."
 ```{r child = 'header.tex'}
 ```
 
-# Contribute
+# ReadMe
+
+## Contribute
 
 Write an Rmd file.  Add via a pull-request.
 
 Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.
 
 You can write math in normal LaTeX.
+
+## Downloading the Rmds
+
+* Move mouse up to header of the example you want to download.
+* Click on the "pencil" icon to take you to GitHub.
+* In the top right, RIGHT click on `Raw` button.
+* Save as ...
