@@ -1,0 +1,9 @@
+bookdown::gitbook:
+  css: style.css
+  config:
+    toc:
+      before: |
+        <li><a href="./">A Wiki for Example Rmds for MARSS</a></li>
+      after: |
+        <li><a href="https://github.com/nwfsc-timeseries/MARSS-wiki" target="blank">Published with bookdown</a></li>
+    edit: https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/%s

@@ -1,0 +1,10 @@
+book_filename: "MARSS-wiki"
+chapter_name: ""
+repo: https://github.com/nwfsc-timeseries/MARSS-wiki
+output_dir: docs
+rmd_files: [
+  "index.Rmd",
+  "rmdfiles/01-plot-states-from-dfa.Rmd",
+  "rmdfiles/02-test-math.Rmd"
+  ]
+rmd_subdir: TRUE
