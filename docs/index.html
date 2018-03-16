@@ -105,9 +105,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Contribute</a></li>
 <li class="chapter" data-level="2" data-path="plot-states-from-a-dfa-using-ggplot.html"><a href="plot-states-from-a-dfa-using-ggplot.html"><i class="fa fa-check"></i><b>2</b> Plot states from a DFA using ggplot</a></li>
-<li class="chapter" data-level="3" data-path="test-math.html"><a href="test-math.html"><i class="fa fa-check"></i><b>3</b> test math</a><ul>
-<li class="chapter" data-level="3.1" data-path="test-math.html"><a href="test-math.html#univariate-linear-regression"><i class="fa fa-check"></i><b>3.1</b> Univariate linear regression</a></li>
-</ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/nwfsc-timeseries/MARSS-wiki" target="blank">Published with bookdown</a></li>
 
@@ -137,6 +134,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1><span class="header-section-number">1</span> Contribute</h1>
 <p>Write an Rmd file. Add via a pull-request.</p>
 <p>Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have <code>#</code> (chapter level). Subsequent headings should be <code>##</code>.</p>
+<p>You can write math in normal LaTeX.</p>
 
 </div>
             </section>
@@ -178,7 +176,7 @@ gitbook.start({
 "link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/index.Rmd",
 "text": "Edit"
 },
-"download": ["MARSS-wiki.pdf", "MARSS-wiki.epub"],
+"download": null,
 "toc": {
 "collapse": "subsection"
 }
@@ -186,19 +184,6 @@ gitbook.start({
 });
 </script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    var src = "";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(src))
-      src = src.replace(/^https?:/, '');
-    script.src = src;
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 </body>
 
 </html>

@@ -4,7 +4,6 @@ repo: https://github.com/nwfsc-timeseries/MARSS-wiki
 output_dir: docs
 rmd_files: [
   "index.Rmd",
-  "rmdfiles/01-plot-states-from-dfa.Rmd",
-  "rmdfiles/02-test-math.Rmd"
+  "rmdfiles/01-plot-states-from-dfa.Rmd"
   ]
 rmd_subdir: TRUE
