@@ -16,9 +16,13 @@ description: "This is a wiki for MARSS."
 
 ## Contribute
 
-Write an Rmd file.  Add via a pull-request.
+1. Write an Rmd file.
+2. Go to [rmdfiles folder](https://github.com/nwfsc-timeseries/MARSS-wiki/tree/master/rmdfiles)
+3. Click on `Upload files`
+4. Select 'Create new branch and start a pull request'
 
-Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.
+
+Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.  Don't add yaml to the top of your Rmd.  Look at an existing Rmd in the folder for an example.
 
 You can write math in normal LaTeX.
 
