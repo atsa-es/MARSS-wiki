@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-
-<link rel="next" href="plot-states-from-a-marss-fit.html">
+<link rel="prev" href="index.html">
+<link rel="next" href="plot-states-from-a-dfa-using-ggplot.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -129,42 +129,49 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">MARSS wiki</h1>
-<h4 class="author"><em>EE Holmes</em></h4>
-<h4 class="date"><em>2018-03-17</em></h4>
-</div>
-<div id="readme" class="section level1">
-<h1><span class="header-section-number">1</span> ReadMe</h1>
-<div id="contribute" class="section level2">
-<h2><span class="header-section-number">1.1</span> Contribute</h2>
-<ol style="list-style-type: decimal">
-<li>Write an Rmd file.</li>
-<li>Go to <a href="https://github.com/nwfsc-timeseries/MARSS-wiki/tree/master/rmdfiles">rmdfiles folder</a></li>
-<li>Click on <code>Upload files</code></li>
-<li>Select ‘Create new branch and start a pull request’</li>
-</ol>
-<p>Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have <code>#</code> (chapter level). Subsequent headings should be <code>##</code>. Don’t add yaml to the top of your Rmd. Look at an existing Rmd in the folder for an example.</p>
-<p>You can write math in normal LaTeX.</p>
-</div>
-<div id="downloading-the-rmds" class="section level2">
-<h2><span class="header-section-number">1.2</span> Downloading the Rmds</h2>
-<ul>
-<li>Move mouse up to header of the example you want to download.</li>
-<li>Click on the “pencil” icon to take you to GitHub.</li>
-<li>In the top right, RIGHT click on <code>Raw</code> button.</li>
-<li>Save as …</li>
-</ul>
+<div id="plot-states-from-a-marss-fit" class="section level1">
+<h1><span class="header-section-number">2</span> Plot states from a MARSS fit</h1>
+<p>date: March 16, 2018</p>
+<p>Required packages</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(MARSS)
+<span class="kw">library</span>(broom)
+<span class="kw">library</span>(ggplot2)
+<span class="kw">library</span>(dplyr)
+if(<span class="kw">packageVersion</span>(<span class="st">&quot;MARSS&quot;</span>)&lt;<span class="st">&quot;3.10.4&quot;</span>) <span class="kw">stop</span>(<span class="st">&quot;Need MARSS version 3.10.4 at least.&quot;</span>, <span class="dt">call.=</span><span class="ot">FALSE</span>)</code></pre></div>
+<p>Fit a model</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(harborSealWA)
 
-</div>
+kemfit &lt;-<span class="st"> </span><span class="kw">MARSS</span>(<span class="kw">t</span>(harborSealWA[,-<span class="dv">1</span>]), <span class="dt">model=</span><span class="kw">list</span>(<span class="dt">Z=</span><span class="kw">as.factor</span>(<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>)), 
+   <span class="dt">R=</span><span class="st">&quot;diagonal and equal&quot;</span>))</code></pre></div>
+<p>Create a function for fitting.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">plot_fitted =<span class="st"> </span>function(fitted_model, <span class="dt">type=</span><span class="kw">c</span>(<span class="st">&quot;states&quot;</span>, <span class="st">&quot;fits&quot;</span>)) {
+    if(type==<span class="st">&quot;states&quot;</span>) {
+        states =<span class="st"> </span><span class="kw">tidy</span>(kemfit, <span class="st">&quot;states&quot;</span>)
+        states =<span class="st"> </span>dplyr::<span class="kw">rename</span>(states, <span class="dt">state=</span>term)
+        states$state =<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;State &quot;</span>,states$state)
+        g =<span class="st"> </span><span class="kw">ggplot</span>(states, <span class="kw">aes</span>(t, estimate)) +<span class="st"> </span>
+<span class="st">        </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> conf.low, <span class="dt">ymax=</span>conf.high), <span class="dt">alpha=</span><span class="fl">0.3</span>, <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>) +<span class="st"> </span>
+<span class="st">        </span><span class="kw">geom_line</span>() +<span class="st"> </span><span class="kw">xlab</span>(<span class="st">&quot;Time&quot;</span>) +<span class="st"> </span><span class="kw">ylab</span>(<span class="st">&quot;Estimate&quot;</span>) +<span class="st"> </span>
+<span class="st">        </span><span class="kw">facet_wrap</span>(~state, <span class="dt">scale=</span><span class="st">&quot;free_y&quot;</span>)
+        <span class="kw">return</span>(g)
+    }
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">plot =<span class="st"> </span><span class="kw">plot_fitted</span>(kemfit, <span class="dt">type=</span><span class="st">&quot;states&quot;</span>)
+<span class="kw">print</span>(plot)</code></pre></div>
+<p><img src="MARSS-wiki_files/figure-html/make-a-plot-1.png" width="672" /></p>
+<p>We can still manipulate / add to the plot of the states as we would with any other <code>ggplot()</code> graphics. for example, add a title:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">plot =<span class="st"> </span>plot +<span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">&quot;2 - trend MARSS model&quot;</span>)
+<span class="kw">print</span>(plot)</code></pre></div>
+<p><img src="MARSS-wiki_files/figure-html/add-a-title-1.png" width="672" /></p>
+
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="plot-states-from-a-marss-fit.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="plot-states-from-a-dfa-using-ggplot.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -194,7 +201,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/index.Rmd",
+"link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/rmdfiles/01-ggplot-example.Rmd",
 "text": "Edit"
 },
 "download": null,

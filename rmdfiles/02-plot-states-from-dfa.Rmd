@@ -1,9 +1,8 @@
 # Plot states from a DFA using ggplot
 
-author: EE Holmes
 date: March 15, 2018
 
-Requires MARSS 3.10.4+
+Requires MARSS 3.10.5+
 
 
 Required packages
@@ -11,6 +10,7 @@ Required packages
 library(MARSS)
 library(broom)
 library(ggplot2)
+if(packageVersion("MARSS")<"3.10.4") stop("Need MARSS version 3.10.4 at least.")
 ```
 
 Load data and zscore
