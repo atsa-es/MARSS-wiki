@@ -7,9 +7,6 @@ github-repo: nwfsc-timeseries/MARSS-wiki
 description: "This is a wiki for MARSS."
 ---
 
-```{r child = 'header.tex'}
-```
-
 # ReadMe
 
 ## Contribute
@@ -20,7 +17,7 @@ description: "This is a wiki for MARSS."
 4. Select 'Create new branch and start a pull request'
 
 
-Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.  Don't add yaml to the top of your Rmd.  Look at an existing Rmd in the folder for an example.  You can write math in normal LaTeX.
+Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.  Don't add yaml to the top of your Rmd.  Look at an existing Rmd in the folder for an example.  You can write math in normal LaTeX, but you need to escape the equation ref (so looks like `\\ref{}`).
 
 You can also post at the wiki associated with the MARSS repo, but then it'll just be raw R or Rmd code.  [MARSS simple wiki](https://github.com/nwfsc-timeseries/MARSS/wiki)
 
