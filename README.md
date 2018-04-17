@@ -1,3 +1,3 @@
-This is a minimal example of a book based on R Markdown and **bookdown** (https://github.com/rstudio/bookdown). Please see the page "Get Started" at https://bookdown.org/ for how to compile this example.
+This wiki is based on R Markdown and **bookdown** (https://github.com/rstudio/bookdown). Please see index.Rmd for how to contribute.  Basically, you just need to put an rmd file into rmdfiles folder and it'll appear in the wiki automatically.
 
-You can find the preview of this example at https://bookdown.org/yihui/bookdown-demo/
+The link to the wiki is https://nwfsc-timeseries.github.io/MARSS-wiki
