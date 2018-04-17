@@ -1,7 +1,5 @@
 --- 
 title: "MARSS wiki"
-author: "EE Holmes"
-date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
@@ -22,9 +20,9 @@ description: "This is a wiki for MARSS."
 4. Select 'Create new branch and start a pull request'
 
 
-Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.  Don't add yaml to the top of your Rmd.  Look at an existing Rmd in the folder for an example.
+Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have `#` (chapter level).  Subsequent headings should be `##`.  Don't add yaml to the top of your Rmd.  Look at an existing Rmd in the folder for an example.  You can write math in normal LaTeX.
 
-You can write math in normal LaTeX.
+You can also post at the wiki associated with the MARSS repo, but then it'll just be raw R or Rmd code.  [MARSS simple wiki](https://github.com/nwfsc-timeseries/MARSS/wiki)
 
 ## Downloading the Rmds
 
