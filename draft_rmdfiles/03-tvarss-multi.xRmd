@@ -1,0 +1,187 @@
+# Time-varying population growth rates: multivariate
+
+\begin{comment}
+We will add some i.i.d. observation error drawn from a Normal with variance 0.05 to the data:
+  <<add.obs.err.1, eval=TRUE, echo=FALSE, fig=TRUE, height=4, width=6>>=
+  obs.err=rnorm(TT,0,sd=sqrt(0.05))
+rw = rw+obs.err
+rwd = rwd+obs.err
+mrw = mrw+obs.err
+tvmrw = tvmrw+obs.err
+@
+  
+  To fit the model with MARSS, we first need to specify the structure of the MARSS model. Before we do this translation, let's think about what the $n_t$ are relative to our data.  The $n_t$ is the population size at time $t$.  We can treat our observations as error-free observations of $n_t$, so $o_t=n_t$, or we might think there is some error in our observations, so $o_t=n_t+e_t$.  In the latter case, we will use an approximation for the resulting observation errors:
+\begin{equation}
+\begin{gathered}
+o_t = (o_{t-1}+e_{t-1}) r_t = o_{t-1} r_t + e_{t-1}r_t \approx o_t = o_{t-1} r_t + v_t\\
+v_t \sim \N(0,r)
+\end{gathered}\label{eqn:n.w.err}
+\end{equation}
+While there are problems with this approximation. If $r_t$ is fairly autocorrelated and smooth-ish, the normality assumption might not be too bad.
+
+\subsection{Covariates for $\lambda$}
+Lastly could also model $\lambda_t$ as having a time-varying mean value driven by some covariate ($c_t$), such as smoothed temperature to model temperature driven seasonal effect:
+\begin{equation}
+\begin{gathered}
+\lambda_t = b \lambda_{t-1} + u + c_t + w_t
+\end{gathered}
+\label{tmar:unitvmrw}\end{equation}
+
+<<  >>=
+sig = barl+sin((1:100)*.5/pi)*.5
+at=sig*(1-b)
+n=barr
+for(i in 2:100) n[i]=at[i]+b*n[i-1]+err[i]
+plot(n,type="l",ylim=ylims,bty="l",ylab="r_t",xlab="t")
+title("Mean-Reverting\nwith Time-Varying Mean")
+for(i in 2:100) n[i]=at[i]+b*n[i-1]+err2[i]
+lines(n,type="l",ylim=ylims,col="red")
+for(i in 2:100) n[i]=at[i]+b*n[i-1]+err3[i]
+lines(n,type="l",ylim=ylims,col="blue")
+
+#mean-reverting random walk with time-varying mean
+sig = barr+sin((1:TT)*.5/pi)*.5
+ut=sig*(1-b)
+tvmrw=barr
+for(i in 2:TT) tvmrw[i]=ut[i]+b*tvmrw[i-1]+err[i]
+
+@
+
+\section{Multivariate time-varying model}
+Now let's move to a multivariate model where we have stages and different survivals and fecundities for the different stages.  We will start with a population with two life-stages (e.g. eggs and adults): $n_1$ is stage 1 numbers and $n_2$ is stage 2 numbers.  Let's write this in a tradional manner using a Leslie matrix to capture the population process:
+\begin{equation}
+\begin{bmatrix}
+n_1\\
+n_{2} \end{bmatrix}_t = 
+\begin{bmatrix}
+0&f \\
+s&\phi \end{bmatrix}_t
+\begin{bmatrix}
+n_{1}\\
+n_{2}\end{bmatrix}_{t-1}
+\label{tmar:tmar1}\end{equation}
+where $f$ is fecundity (stage 2 to stage 1), $s$ is stage 1 survival to stage 2, and $\phi$ is stage 2 to stage 2 survival.  There is no process error term explicitly included, but it is implicitly included because the Leslie matrix is time-varying (notice the $t$ subscript). 
+
+We can re-write Equation \ref{tmar:tmar1} as:
+\begin{equation}
+\begin{gathered}
+\begin{bmatrix}
+n_1\\
+n_2 \end{bmatrix}_t =  
+\begin{bmatrix}
+n_{1}&n_{2}&0&0\\
+0&0&n_{1}&n_{2}\end{bmatrix}_{t-1}
+\begin{bmatrix}
+0\\
+f\\
+s\\
+\phi \end{bmatrix}_t +
+\begin{bmatrix}
+v_1\\
+v_2\end{bmatrix}_{t} \\
+\vv_t \sim \MVN(0, \RR)
+\end{gathered}
+\label{tmar:tmar2}\end{equation}
+
+Equation \ref{tmar:tmar2} is a form of the observation model in MARSS form:
+\begin{equation}
+\YY_t = \ZZ_t \XX_t + \vv_t
+\label{tmar:tmar.obs}
+\end{equation}
+where $\ZZ_t$ a matrix with the $n$ at time $t-1$ and $\XX_t$ is a vector of the Leslie matrix parameters at time $t$.  The Leslie matrix parameters are then described with the process model part of the MARSS model:
+\begin{equation}
+\begin{gathered}
+\XX_t = \BB_t \XX_t + \uu + \ww_t \\
+\ww_t \sim \MVN(0, \QQ)
+\end{gathered}
+\label{tmar:tmar.process}
+\end{equation}
+This allows the Leslie matrix parameters to be time-varying and (potentially) evolve over time as a random walk.
+
+\subsection{Constant mean Leslie matrix}
+Equation \ref{tmar:tmar.process} describes how the Leslie matrix parameters evolve over time.  Let's start with a model where the mean rates are constant but they vary independently year-to-year.  This model can be written:
+  
+  \begin{equation}
+\begin{gathered}
+\begin{bmatrix}
+0\\
+f\\
+s\\
+\phi \end{bmatrix}_t =
+  \begin{bmatrix}
+0\\
+\bar{f}\\
+\bar{s}\\
+\bar{\phi}\end{bmatrix} +
+  \begin{bmatrix}
+0\\
+w_f\\
+w_s\\
+w_\phi\end{bmatrix} \\
+\ww \sim \MVN(0,\Sigma)
+\end{gathered}
+\end{equation}
+
+Let's create some simulated data with a constant mean Leslie matrix.  We set survival of stage 1 to 20\% and of stage 2 to 87%.  Fecundity is set at 1.  This gives a $\lambda$ (max eigenvalue) of 1.058 for the matrix.
+<<set.up.params, eval=TRUE>>=
+TT = 30
+s=0.2
+phi=.87
+f=1
+LM=matrix(c(0,s,f,phi),2,2,)
+q=0.05
+r=0.01
+@
+We simulate some data from this Leslie matrix with independent variability added to the fecundity and survivals and then add observation error.
+<<set.up.params, eval=TRUE>>=
+Ns=matrix(0,2,TT)
+Ns[,1]=c(30,20) #starting pop size
+for(t in 2:TT){
+EM=matrix(rnorm(4,0,sqrt(q)),2,2)
+#constrain survival to be less than or equal to 1
+LMt = LM+EM; LMt[2,LMt[2,]>1]=1
+Ns[,t]=LMt%*%Ns[,t-1,drop=FALSE]
+}
+#add observation error
+r=0.01
+Ns=Ns+matrix(rnorm(TT*2,0,sqrt(r)),2,TT)
+@
+Figure \ref{figtmar:Ns1} shows a plot of the simulated data.
+\begin{figure}[htp]
+\begin{center}
+<<plotNs, eval=TRUE, echo=FALSE, fig=TRUE, height=4, width=6>>=
+matplot(t(Ns),type="l",ylab="year",xlab="N",col=c("red","black"))
+legend("topright", c("Stage 1", "Stage 2"), col=c("red","black"), bty="n", lty=1)
+@
+\end{center}
+\caption{Simulated stage 1 and stage 2 numbers.}
+\label{figtmar:Ns1}
+\end{figure}
+
+To fit the model with MARSS, we first need to specify the structure of the MARSS model:
+<<marss.model.1, keep.source=TRUE>>=
+#observaton eqn.  Specify Z, R, and A
+Zt=array(0,dim=c(2,4,TT-1))
+for(t in 2:TT){
+Zt[1,1:2,t-1]=Ns[,t-1]
+Zt[2,3:4,t-1]=Ns[,t-1]
+}
+R="diagonal and equal"
+A="zero"
+
+#state eqn. Specify B, W, and U
+B="zero"
+U=matrix(list(0,"f","s","phi"),4,1)
+Q=matrix(list(0),4,4); diag(Q)=list(0,"q","q","q")
+
+#specify the initial states
+#because x0 does not appear in the model we can fix it at 0
+x0=matrix(0,4,1)
+V0="zero"
+@
+
+Now we can fit the model.  Notice that the first time-step of $Ns$ was used in $\ZZ$, therefore we need to strip that first time step off the data we pass to MARSS.
+<<fit.marss1>>=
+tmar.model=list(Z=Zt, R=R, A=A, B=B, Q=Q, U=U, x0=x0, V0=V0)
+tmp=MARSS(Ns[,2:TT], model=tmar.model)
+@

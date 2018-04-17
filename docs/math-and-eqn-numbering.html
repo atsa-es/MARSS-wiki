@@ -22,18 +22,16 @@
   <meta name="twitter:description" content="This is a wiki for MARSS." />
   
 
-<meta name="author" content="EE Holmes">
 
 
-<meta name="date" content="2018-03-17">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="plot-states-from-a-dfa-using-ggplot.html">
-
+<link rel="prev" href="index.html">
+<link rel="next" href="plot-states-from-a-marss-fit.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -107,9 +105,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#contribute"><i class="fa fa-check"></i><b>1.1</b> Contribute</a></li>
 <li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#downloading-the-rmds"><i class="fa fa-check"></i><b>1.2</b> Downloading the Rmds</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="plot-states-from-a-marss-fit.html"><a href="plot-states-from-a-marss-fit.html"><i class="fa fa-check"></i><b>2</b> Plot states from a MARSS fit</a></li>
-<li class="chapter" data-level="3" data-path="plot-states-from-a-dfa-using-ggplot.html"><a href="plot-states-from-a-dfa-using-ggplot.html"><i class="fa fa-check"></i><b>3</b> Plot states from a DFA using ggplot</a></li>
-<li class="chapter" data-level="4" data-path="plot-states-from-a-dfa-using-ggplot-1.html"><a href="plot-states-from-a-dfa-using-ggplot-1.html"><i class="fa fa-check"></i><b>4</b> Plot states from a DFA using ggplot</a></li>
+<li class="chapter" data-level="2" data-path="math-and-eqn-numbering.html"><a href="math-and-eqn-numbering.html"><i class="fa fa-check"></i><b>2</b> Math and Eqn numbering</a></li>
+<li class="chapter" data-level="3" data-path="plot-states-from-a-marss-fit.html"><a href="plot-states-from-a-marss-fit.html"><i class="fa fa-check"></i><b>3</b> Plot states from a MARSS fit</a></li>
+<li class="chapter" data-level="4" data-path="plot-states-from-a-dfa-using-ggplot.html"><a href="plot-states-from-a-dfa-using-ggplot.html"><i class="fa fa-check"></i><b>4</b> Plot states from a DFA using ggplot</a></li>
+<li class="chapter" data-level="5" data-path="time-varying-population-growth-rates-univariate.html"><a href="time-varying-population-growth-rates-univariate.html"><i class="fa fa-check"></i><b>5</b> Time-varying population growth rates: univariate</a><ul>
+<li class="chapter" data-level="5.1" data-path="time-varying-population-growth-rates-univariate.html"><a href="time-varying-population-growth-rates-univariate.html#univariate-model"><i class="fa fa-check"></i><b>5.1</b> Univariate model</a></li>
+</ul></li>
 <li class="divider"></li>
 <li><a href="https://bookdown.org/yihui/bookdown/" target="blank">Published with bookdown</a></li>
 
@@ -130,40 +131,100 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="plot-states-from-a-dfa-using-ggplot-1" class="section level1">
-<h1><span class="header-section-number">4</span> Plot states from a DFA using ggplot</h1>
-<p>date: March 15, 2018</p>
-<p>Requires MARSS 3.10.5+</p>
-<p>Required packages</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(MARSS)
-<span class="kw">library</span>(broom)
-<span class="kw">library</span>(ggplot2)
-if(<span class="kw">packageVersion</span>(<span class="st">&quot;MARSS&quot;</span>)&lt;<span class="st">&quot;3.10.4&quot;</span>) <span class="kw">stop</span>(<span class="st">&quot;Need MARSS version 3.10.4 at least.&quot;</span>)</code></pre></div>
-<p>Load data and zscore</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(lakeWAplankton)
-<span class="co"># we want lakeWAplanktonTrans, which has been log-transformed</span>
-<span class="co"># and the 0s replaced with NAs</span>
-plankdat =<span class="st"> </span>lakeWAplanktonTrans
-years =<span class="st"> </span>plankdat[,<span class="st">&quot;Year&quot;</span>]&gt;=<span class="dv">1980</span> &amp;<span class="st"> </span>plankdat[,<span class="st">&quot;Year&quot;</span>]&lt;<span class="dv">1990</span>
-phytos =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Cryptomonas&quot;</span>, <span class="st">&quot;Diatoms&quot;</span>, <span class="st">&quot;Greens&quot;</span>,
-                  <span class="st">&quot;Unicells&quot;</span>, <span class="st">&quot;Other.algae&quot;</span>)
-dat.spp<span class="fl">.1980</span> =<span class="st"> </span>plankdat[years,phytos]
-<span class="co"># transpose data so time goes across columns</span>
-dat.spp<span class="fl">.1980</span> =<span class="st"> </span><span class="kw">t</span>(dat.spp<span class="fl">.1980</span>)
-dat.z =<span class="st"> </span><span class="kw">zscore</span>(dat.spp<span class="fl">.1980</span>)</code></pre></div>
-<p>Fit a DFA with 3 trends. Setting <code>maxit</code> to 50, so it runs fast.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model.list =<span class="st"> </span><span class="kw">list</span>(<span class="dt">m=</span><span class="dv">3</span>, <span class="dt">R=</span><span class="st">&quot;diagonal and unequal&quot;</span>)
-kemz<span class="fl">.3</span> =<span class="st"> </span><span class="kw">MARSS</span>(dat.spp<span class="fl">.1980</span>, <span class="dt">model=</span>model.list,
-    <span class="dt">z.score=</span><span class="ot">TRUE</span>, <span class="dt">form=</span><span class="st">&quot;dfa&quot;</span>, <span class="dt">control=</span><span class="kw">list</span>(<span class="dt">maxit=</span><span class="dv">50</span>))</code></pre></div>
-<p>Make a plot of trends with CIs</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">theme_set</span>(<span class="kw">theme_bw</span>())
-d &lt;-<span class="st"> </span><span class="kw">tidy</span>(kemz<span class="fl">.3</span>, <span class="dt">type=</span><span class="st">&quot;states&quot;</span>)
- <span class="kw">ggplot</span>(<span class="dt">data =</span> d) +<span class="st"> </span>
-<span class="st">   </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(t, estimate)) +
-<span class="st">   </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">x=</span>t, <span class="dt">ymin=</span>conf.low, <span class="dt">ymax=</span>conf.high), <span class="dt">linetype=</span><span class="dv">2</span>, <span class="dt">alpha=</span><span class="fl">0.1</span>) +
-<span class="st">   </span><span class="kw">facet_grid</span>(~term) +
-<span class="st">   </span><span class="kw">xlab</span>(<span class="st">&quot;Time Step&quot;</span>) +<span class="st"> </span><span class="kw">ylab</span>(<span class="st">&quot;Val&quot;</span>)</code></pre></div>
-<p><img src="MARSS-wiki_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config"> 
+  MathJax.Hub.Config({ 
+    TeX: { 
+      equationNumbers: {autoNumber: "all"},
+      Macros: {
+        AA: "{\\bf A}",
+        BB: "{\\bf B}",
+        aa: "{\\mathbf{a}}",
+        bb: "{\\mathbf{b}}",
+        CC: "{\\mathbf{C}}",
+        cc: "{\\mathbf{c}}",
+        DD: "{\\mathbf{D}}",
+        dd: "{\\mathbf{d}}",
+        EE: "{\\mathbf{E}}",
+        ee: "{\\mathbf{e}}",
+        FF: "{\\mathbf{F}}",
+        ff: "{\\mathbf{f}}",
+        GG: "{\\mathbf{G}}",
+        gg: "{\\mathbf{g}}",
+        HH: "{\\mathbf{H}}",
+        II: "{\\mathbf{I}}",
+        LL: "{\\mathbf{L}}",
+        MM: "{\\mathbf{M}}",
+        mm: "{\\mathbf{m}}",
+        NN: "{\\mathbf{N}}",
+        nn: "{\\mathbf{n}}",
+        OO: "{\\mathbf{O}}",
+        PP: "{\\mathbf{P}}",
+        pp: "{\\mathbf{p}}",
+        QQ: "{\\mathbf{Q}}",
+        qq: "{\\mathbf{q}}",
+        RR: "{\\mathbf{R}}",
+        rr: "{\\mathbf{r}}",
+        UU: "{\\mathbf{U}}",
+        uu: "{\\mathbf{u}}",
+        VV: "{\\mathbf{V}}",
+        vv: "{\\mathbf{v}}",
+        WW: "{\\mathbf{W}}",
+        ww: "{\\mathbf{w}}",
+        XX: "{\\mathbf{X}}",
+        xx: "{\\mathbf{x}}",
+        YY: "{\\mathbf{Y}}",
+        yy: "{\\mathbf{y}}",
+        ZZ: "{\\mathbf{Z}}",
+        zz: "{\\mathbf{z}}",
+        epiepi: "{\\boldsymbol{\\epsilon}}",
+        pipi: "{\\boldsymbol{\\pi}}",
+        mumu: "{\\boldsymbol{\\mu}}",
+        uupsilon: "{\\pmb{\\upsilon}}",
+        llambda: "{\\pmb{\\lambda}}",
+        bbeta: "{\\pmb{\\beta}}",
+        aalpha: "{\\pmb{\\alpha}}",
+        zzeta: "{\\pmb{\\zeta}}",
+        ttheta: "{\\pmb{\\theta}}",
+        ttheta: "{\\pmb{\\theta}}",
+        etaeta: "{\\boldsymbol{\\eta}}",
+        xixi: "{\\boldsymbol{\\xi}}",
+        PI: "{\\boldsymbol{\\Pi}}",
+        LAM: "{\\boldsymbol{\\Lambda}}",
+        GAM: "{\\boldsymbol{\\Gamma}}",
+        SI: "{\\boldsymbol{\\Sigma}}",
+        TH: "{\\boldsymbol{\\Theta}}",
+        PH: "{\\boldsymbol{\\Phi}}",
+        zer: "{\\mathbf{0}}",
+        vec: "{\\,\\text{vec}}",
+        exp: "{\\,\\text{exp}}",
+        var: "{\\,\\text{var}}",
+        diag: "{\\,\\text{diag}}",
+        cov: "{\\,\\text{cov}}",
+        MVN: "{\\,\\text{MVN}}",
+        AIC: "{\\,\\text{AIC}}",
+        E: "{\\,\\text{E}}",
+        Lik: "{\\,\\text{L}}",
+        N: "{\\,\\text{N}}"
+      }
+    } 
+  });
+</script>
+<div id="math-and-eqn-numbering" class="section level1">
+<h1><span class="header-section-number">2</span> Math and Eqn numbering</h1>
+<p>In the pdf, this will not have a number but in the html it will.</p>
+<p><span class="math display">\[
+\AA^\top\BB
+\]</span> You can use nonumber if you need the equation numbering to be the same in html and pdf.</p>
+<p><span class="math display">\[
+\AA^\top\BB\nonumber
+\]</span></p>
+If we want to crossref an equation, use equation environment and escape the ref command so it looks like <code>\\ref{}</code>. This is Equation \ref{eqn1}.
+<span class="math display">\[\begin{equation}
+\AA^\top\BB
+\label{eqn1}\end{equation}\]</span>
+<p>This is Equation \ref{eqn1}.</p>
 
 </div>
             </section>
@@ -171,8 +232,8 @@ d &lt;-<span class="st"> </span><span class="kw">tidy</span>(kemz<span class="fl
           </div>
         </div>
       </div>
-<a href="plot-states-from-a-dfa-using-ggplot.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="plot-states-from-a-marss-fit.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -202,7 +263,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/rmdfiles/Sandbox/03-plot-states-from-dfa.Rmd",
+"link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/rmdfiles/00-test2.Rmd",
 "text": "Edit"
 },
 "download": null,
@@ -213,6 +274,19 @@ gitbook.start({
 });
 </script>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 </body>
 
 </html>

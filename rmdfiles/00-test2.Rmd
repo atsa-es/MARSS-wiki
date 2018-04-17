@@ -1,0 +1,35 @@
+---
+title: "Math and Eqn numbering"
+knit: ( function(inputFile, encoding) { if(rmarkdown::all_output_formats(inputFile)[1]=="html_document"){ f <- inputFile; x <- readLines(f); y <- gsub("[\\]ref[{]","\\\\\\\\ref{", x); cat(y,file="tmp.Rmd", sep="\n"); rmarkdown::render("tmp.Rmd", encoding = encoding, output_file =  gsub("[.]Rmd",".html",inputFile)) }else{ rmarkdown::render(inputFile, encoding = encoding ) } })
+output: 
+  html_document:
+    includes:
+      before_body: [../tex/mathjax3.html]
+  pdf_document: 
+    includes: 
+      before_body: ../tex/defs2.tex
+---
+
+# Math and Eqn numbering
+
+```{r test-setup, include=FALSE, purl=FALSE}
+knitr::opts_knit$set(unnamed.chunk.label = "test-")
+```
+
+In the pdf, this will not have a number but in the html it will.
+
+$$
+\AA^\top\BB
+$$
+You can use nonumber if you need the equation numbering to be the same in html and pdf.
+
+$$
+\AA^\top\BB\nonumber
+$$
+
+If we want to crossref an equation, use equation environment and escape the ref command so it looks like `\\ref{}`.  This is Equation \\ref{eqn1}.
+\begin{equation}
+\AA^\top\BB
+\label{eqn1}\end{equation}
+This is Equation \\ref{eqn1}.
+

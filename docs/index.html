@@ -31,7 +31,7 @@
   
   
 
-<link rel="next" href="plot-states-from-a-marss-fit.html">
+<link rel="next" href="math-and-eqn-numbering.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -105,8 +105,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#contribute"><i class="fa fa-check"></i><b>1.1</b> Contribute</a></li>
 <li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#downloading-the-rmds"><i class="fa fa-check"></i><b>1.2</b> Downloading the Rmds</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="plot-states-from-a-marss-fit.html"><a href="plot-states-from-a-marss-fit.html"><i class="fa fa-check"></i><b>2</b> Plot states from a MARSS fit</a></li>
-<li class="chapter" data-level="3" data-path="plot-states-from-a-dfa-using-ggplot.html"><a href="plot-states-from-a-dfa-using-ggplot.html"><i class="fa fa-check"></i><b>3</b> Plot states from a DFA using ggplot</a></li>
+<li class="chapter" data-level="2" data-path="math-and-eqn-numbering.html"><a href="math-and-eqn-numbering.html"><i class="fa fa-check"></i><b>2</b> Math and Eqn numbering</a></li>
+<li class="chapter" data-level="3" data-path="plot-states-from-a-marss-fit.html"><a href="plot-states-from-a-marss-fit.html"><i class="fa fa-check"></i><b>3</b> Plot states from a MARSS fit</a></li>
+<li class="chapter" data-level="4" data-path="plot-states-from-a-dfa-using-ggplot.html"><a href="plot-states-from-a-dfa-using-ggplot.html"><i class="fa fa-check"></i><b>4</b> Plot states from a DFA using ggplot</a></li>
+<li class="chapter" data-level="5" data-path="time-varying-population-growth-rates-univariate.html"><a href="time-varying-population-growth-rates-univariate.html"><i class="fa fa-check"></i><b>5</b> Time-varying population growth rates: univariate</a><ul>
+<li class="chapter" data-level="5.1" data-path="time-varying-population-growth-rates-univariate.html"><a href="time-varying-population-growth-rates-univariate.html#univariate-model"><i class="fa fa-check"></i><b>5.1</b> Univariate model</a></li>
+</ul></li>
 <li class="divider"></li>
 <li><a href="https://bookdown.org/yihui/bookdown/" target="blank">Published with bookdown</a></li>
 
@@ -127,6 +131,86 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config"> 
+  MathJax.Hub.Config({ 
+    TeX: { 
+      equationNumbers: {autoNumber: "all"},
+      Macros: {
+        AA: "{\\bf A}",
+        BB: "{\\bf B}",
+        aa: "{\\mathbf{a}}",
+        bb: "{\\mathbf{b}}",
+        CC: "{\\mathbf{C}}",
+        cc: "{\\mathbf{c}}",
+        DD: "{\\mathbf{D}}",
+        dd: "{\\mathbf{d}}",
+        EE: "{\\mathbf{E}}",
+        ee: "{\\mathbf{e}}",
+        FF: "{\\mathbf{F}}",
+        ff: "{\\mathbf{f}}",
+        GG: "{\\mathbf{G}}",
+        gg: "{\\mathbf{g}}",
+        HH: "{\\mathbf{H}}",
+        II: "{\\mathbf{I}}",
+        LL: "{\\mathbf{L}}",
+        MM: "{\\mathbf{M}}",
+        mm: "{\\mathbf{m}}",
+        NN: "{\\mathbf{N}}",
+        nn: "{\\mathbf{n}}",
+        OO: "{\\mathbf{O}}",
+        PP: "{\\mathbf{P}}",
+        pp: "{\\mathbf{p}}",
+        QQ: "{\\mathbf{Q}}",
+        qq: "{\\mathbf{q}}",
+        RR: "{\\mathbf{R}}",
+        rr: "{\\mathbf{r}}",
+        UU: "{\\mathbf{U}}",
+        uu: "{\\mathbf{u}}",
+        VV: "{\\mathbf{V}}",
+        vv: "{\\mathbf{v}}",
+        WW: "{\\mathbf{W}}",
+        ww: "{\\mathbf{w}}",
+        XX: "{\\mathbf{X}}",
+        xx: "{\\mathbf{x}}",
+        YY: "{\\mathbf{Y}}",
+        yy: "{\\mathbf{y}}",
+        ZZ: "{\\mathbf{Z}}",
+        zz: "{\\mathbf{z}}",
+        epiepi: "{\\boldsymbol{\\epsilon}}",
+        pipi: "{\\boldsymbol{\\pi}}",
+        mumu: "{\\boldsymbol{\\mu}}",
+        uupsilon: "{\\pmb{\\upsilon}}",
+        llambda: "{\\pmb{\\lambda}}",
+        bbeta: "{\\pmb{\\beta}}",
+        aalpha: "{\\pmb{\\alpha}}",
+        zzeta: "{\\pmb{\\zeta}}",
+        ttheta: "{\\pmb{\\theta}}",
+        ttheta: "{\\pmb{\\theta}}",
+        etaeta: "{\\boldsymbol{\\eta}}",
+        xixi: "{\\boldsymbol{\\xi}}",
+        PI: "{\\boldsymbol{\\Pi}}",
+        LAM: "{\\boldsymbol{\\Lambda}}",
+        GAM: "{\\boldsymbol{\\Gamma}}",
+        SI: "{\\boldsymbol{\\Sigma}}",
+        TH: "{\\boldsymbol{\\Theta}}",
+        PH: "{\\boldsymbol{\\Phi}}",
+        zer: "{\\mathbf{0}}",
+        vec: "{\\,\\text{vec}}",
+        exp: "{\\,\\text{exp}}",
+        var: "{\\,\\text{var}}",
+        diag: "{\\,\\text{diag}}",
+        cov: "{\\,\\text{cov}}",
+        MVN: "{\\,\\text{MVN}}",
+        AIC: "{\\,\\text{AIC}}",
+        E: "{\\,\\text{E}}",
+        Lik: "{\\,\\text{L}}",
+        N: "{\\,\\text{N}}"
+      }
+    } 
+  });
+</script>
 <div id="header">
 <h1 class="title">MARSS wiki</h1>
 </div>
@@ -160,7 +244,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         </div>
       </div>
 
-<a href="plot-states-from-a-marss-fit.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="math-and-eqn-numbering.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -201,6 +285,19 @@ gitbook.start({
 });
 </script>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 </body>
 
 </html>

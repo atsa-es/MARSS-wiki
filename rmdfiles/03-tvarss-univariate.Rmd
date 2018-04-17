@@ -1,0 +1,223 @@
+```{r tvarss-setup, include=FALSE, purl=FALSE}
+knitr::opts_knit$set(unnamed.chunk.label = "tvarss-")
+```
+
+```{r tvarss-libraries}
+require(MARSS)
+```
+
+# Time-varying population growth rates: univariate
+
+In this case study, we will use MARSS to fit a time-varying MAR model, that is a MAR model in which the parameters are time-varying.  In the economics literature, such models are known as time-varying VAR models (TVAR).  In this example, we use a time-varying MAR to model a stage-structured population with stage-specific survivals and fecundity that vary with time according to an auto-regressive process. We assume for this case study that the data do not have observation error; that is, that the observations are the true population size. The models in this chapter are a form of dynamic linear model (DLM), and the reader may want to review the chapter on DLMs in the User Guide.
+
+## Univariate model
+
+Before doing the multivariate case (time-varying MAR), we show a univariate case or the time-varying AR model using a simple population model with exponential growth. This model is typically written as follows:
+\begin{equation}
+n_t = n_{t-1}(\lambda \times exp(w_t))
+\label{tmar:se}\end{equation}
+where $w_t$ are normal errors and $\lambda$ is the population growth rate.  This is the vanilla stochastic exponential growth model and the lognormal errors ($exp(w_t)$) mean that $\lambda$ make proportional changes (e.g. +/- 10\% rather than +/- 0.1) and stays positive.  Written in log-space, this is $\log(n_t) = \log(n_{t-1}) + \log(\lambda) + w_t$ where $w_t \sim \N(0, \sigma^2)$.  
+
+When we work with this model in log-space, we have a linear model with Gaussian errors. This is one reason we would normally log transform the data. However, we are working up to a multivariate version of this model, where we cannot convert to a linear model by a log transformation.  Thus, we are not going to log-transform the data here.  If we do not log transform our data (the $n$), we could approximate Equation \\ref{tmar:se} with the following model:
+\begin{equation}
+\begin{gathered}
+n_t = n_{t-1} \lambda_t \\
+\lambda_t = \bar{\lambda} + w_t
+\end{gathered}
+\label{tmar:se2}
+\end{equation}
+where $w_t$ is $\N(0, \approx \sigma^2)$ if $\sigma$ is small.  This is a terrible approximation if $\sigma$ is big but for many population models, survival and fecundity are varying no more than +/- 50\% per year (or other relevant time step).  In this case, approximating $\bar{\lambda} \times exp(w_t))$ with a normal distribution is not too terrible.
+
+The point of rewriting the stochastic exponential in this way is that we now can model $\lambda_t$ in other ways.  $\lambda_t=\bar{\lambda} + w_t$ means that the mean population growth rate in year $t$ ($\lambda_t$) just fluctuates around $\bar{\lambda}$ with no temporal correlation or trend up or down.  We could model long-term (and potentially large) changes in the population growth rate by modeling $\lambda_t$ as a random walk, similar to the approach taken in dynamic linear modeling.
+\begin{equation}
+\begin{gathered}
+\lambda_t = \lambda_{t-1} + w_t, w_t \sim \N(0,q)
+\end{gathered}
+\label{tmar:unirw1}
+\end{equation}
+Or we might model the $\bar{\lambda}$ as a random walk and allow the $\lambda_t$ to be a function of that.  This is white noise with a random walk mean:
+\begin{equation}
+\begin{gathered}
+\bar{\lambda}_t = \bar{\lambda}_{t-1} + w_{1,t}, w_{1,t} \sim \N(0,q_1)\\
+\lambda_t = \bar{\lambda}_t + w_{2,t}, w_{2,t} \sim \N(0,q_2)
+\end{gathered}
+\label{tmar:unirw2}
+\end{equation}
+
+We could also model $\lambda_t$ as having a long-term trend (drift) upward or downward but allow it to wander at the same time.  We can do this by adding a drift term $u$ to the $\lambda_t$ random walk model.
+\begin{equation}
+\begin{gathered}
+\lambda_t = \lambda_{t-1} + u + w_t, w_t \sim \N(0,q)\\
+\lambda_0 = \bar{\lambda}
+\end{gathered}
+\label{tmar:unirwwd}\end{equation}
+
+We could model $\lambda_t$ as having a mean value but allow it to drift around that with correlation.  We can do this using a mean-reverting random walk model:
+\begin{equation}
+\begin{gathered}
+\lambda_t = b \lambda_{t-1} + u + w_t, w_t \sim \N(0,q)\\
+\bar{\lambda} = u/(1-b)
+\end{gathered}
+\label{tmar:unimrw}\end{equation}
+
+We could model $\lambda_t$ as having a mean value but year-to-year correlation by using a moving average of idependent errors.  This is a common approach for introducing correlation into the errors in a time-series model.
+\begin{equation}
+\begin{gathered}
+\lambda_t = \bar{\lambda}+\begin{bmatrix}1&\theta\end{bmatrix}\begin{bmatrix}w_t&w_{t-1}\end{bmatrix}\\
+w_t \sim N(0,q)
+\end{gathered}
+\label{tmar:sema}\end{equation}
+
+```{r plotrt-setup, echo=FALSE}
+figcap="Examples of $\\lambda_t$ trajectories for the four different $\\lambda_t$ models.  Each color of line uses the same input errors: randomly drawn from a Normal distribution with mean of 0 and standard deviation of 0.1. The drift term is 0.01.  Mean-reversion ($b$) is 0.9. $\bar(\\lambda)$ is 1.1."
+```
+
+```{r Cs01-tmar.rt,fig.cap=figcap}
+par(mfrow=c(2,2))
+TT=100
+barl=1.01
+drift=.001
+b=.90
+s=sqrt(.001)
+a=barl*(1-b)
+err=c(0,rnorm(TT-1,0,s))
+err2=c(0,rnorm(TT-1,0,s))
+err3=c(0,rnorm(TT-1,0,s))
+
+#white noise around a mean lambda
+ylims=c(0,3)
+plot(barl+err,type="l",ylim=ylims,bty="l",ylab="r_t",xlab="t")
+title("White Noise")
+lines(barl+err2,col="red")
+lines(barl+err3,col="blue")
+
+#random walk
+plot(barl+cumsum(err),type="l",ylim=ylims,bty="l",ylab="r_t",xlab="t")
+title("Random Walk")
+lines(barl+cumsum(err2),col="red")
+lines(barl+cumsum(err3),col="blue")
+
+#white noise around a random walk mean lambda
+#plot(barl+cumsum(err)+err2,type="l",ylim=ylims,bty="l",ylab="r_t",xlab="t")
+#title("Random Walking Mean")
+#lines(barl+cumsum(err2)+err3,col="red")
+#lines(barl+cumsum(err3)+err,col="blue")
+
+#random walk with drift
+plot(barl+cumsum(err+drift),type="l",ylim=ylims,bty="l",ylab="r_t",xlab="t")
+title("Random Walk with Drift")
+lines(barl+cumsum(err2+drift),col="red")
+lines(barl+cumsum(err3+drift),col="blue")
+
+#mean reverting random walk
+n=barl
+for(i in 2:TT) n[i]=a+b*n[i-1]+err[i]
+plot(n,type="l",ylim=ylims,bty="l",ylab="r_t",xlab="t")
+title("Mean-Reverting Random Walk")
+for(i in 2:TT) n[i]=a+b*n[i-1]+err2[i]
+lines(n,type="l",ylim=ylims,col="red")
+for(i in 2:TT) n[i]=a+b*n[i-1]+err3[i]
+lines(n,type="l",ylim=ylims,col="blue")
+```
+
+Let's create some simulated data with mean population growth rate set at 1.01 (so an increasing population).  
+```{r set.up.params.1}
+set.seed(13) #and interesting case
+TT=100
+barl=1.01
+drift=.001 #drift
+n0 = 100
+s=sqrt(.001)
+err=c(0,rnorm(TT,0,s)) #process errors
+
+#white noise
+n.wn = n0
+lambdat=barl+err
+for(i in 2:TT) n.wn[i] = n.wn[i-1]*lambdat[i]
+
+#random walk
+n.rw = n0
+lambdat=barl+cumsum(err)
+for(i in 2:TT) n.rw[i] = n.rw[i-1]*lambdat[i]
+
+#random walk with drift
+n.rwd = n0
+lambdat=barl+cumsum(err+drift)
+for(i in 2:TT) n.rwd[i] = n.rwd[i-1]*lambdat[i]
+
+#mean-reverting random walk
+b=.90
+u=barl*(1-b)
+lambdat=barl
+n.mrw = n0
+for(i in 2:TT){
+lambdat[i]=u+b*lambdat[i-1]+err[i]
+n.mrw[i] = n.mrw[i-1]*lambdat[i]
+}
+```
+
+```{r plotuniNs-setup, echo=FALSE}
+figcap="Simulated population counts with different $\\lambda_t$ models."
+```
+
+```{r Cs-03-tmarunirw,fig.cap=figcap}
+matplot(log(cbind(n.wn,n.rw,n.rwd,n.mrw)),type="l",ylab="t",xlab="N",col=c("black","red","blue","green"))
+legend("topright", c("white noise", "random walk", "rw with drift","mean-reverting rw"), col=c("black","red","blue","green"), bty="l", lty=1)
+```
+
+Let's fit these data using statistical model written in MARSS form.  To do this, we need to write our model in matrix form:
+\begin{equation}
+\begin{gathered}
+\yy_t = \ZZ_t \xx_t + \aa_t + \vv_t, \vv_t \sim \MVN(0,\RR)\\
+\xx_t = \BB_t \xx_{t-1} + \uu_t + \ww_t, \ww_t \sim \MVN(0,\QQ)
+\end{gathered}\label{eqn:tmarss.uni}
+\end{equation}
+Before we do this translation, let's think about what the $n_t$ are relative to our data which are observations not actually the true population size.  We can treat our observations as error-free observations of $n_t$, so $o_t=n_t$, or we might think there is some error in our observations, so $o_t=n_t+e_t$.  
+
+Let's start with treating our observations as perfect so $o_t=n_t$. Our model takes the form
+\begin{equation}
+\begin{gathered}
+o_t = o_{t-1} s_t\\
+\lambda_t = b \lambda_{t-1} + u + w_t, w_t \sim \N(0, q)
+\end{gathered}\label{eqn:rw.no.err}
+\end{equation}
+Notice that all the process error is coming from $\lambda_t$, which is fluctuating year to year.  Comparing Equation \\ref{eqn:rw.no.err} to \\ref{eqn:tmarss.uni}, we see that $\ZZ_t \equiv o_{t-1}$, $\xx_t \equiv s_t$, $\BB \equiv b$, and the other parameters, $u$, $c$ and $q$, have the same names.  Remember that even though we are starting with a univariate case, the MARSS() function needs all parameters specified as matrices.  Even scalars need to be specified as $1 \times 1$ matrices.
+
+Now we can set this up in R. Let's start with the model where $\lambda_t$ is white noise, so simply fluctuating randomly about some mean temporally-constant population growth rate.  Our $\lambda_t$ model reduces to
+\begin{equation}
+\begin{gathered}
+o_t = o_{t-1} \lambda_t\\
+\lambda_t = \bar{\lambda} + w_t, w_t \sim \N(0, q)
+\end{gathered}\label{eqn:rw.no.err}
+\end{equation}
+Notice that $\lambda_0$ does not appear in this model because $t$ starts at 1 (because the data start at $t=1$).
+In R, this model is
+
+```{r tarss.model.rw}
+#lambda_t is wn
+dat = n.wn
+#Z is n at t-1 starting at t=1 up to t=TT-1
+Z=array(dat[1:(TT-1)],dim=c(1,1,TT-1))
+#no observation error and no a in the y equation
+R = "zero"; A="zero"
+
+#state eqn. Specify B, W, and U
+#white noise
+#x_t = U + w_t
+#Q is univariate so diagonal and equal or unequal would be the same
+B="zero"; Q="unconstrained"
+U=matrix("mean.lambda")
+
+#specify the initial states
+#because x0 does not appear in the model we can fix it at 0
+x0=matrix(0)
+V0="zero"
+```
+
+Now we can fit the model.  Notice that the first time-step of the data was used in $\ZZ$, therefore we need to strip that first time step off the data we pass to the `MARSS()` function.
+```{r Cs02_fit.marss.uwn}
+#univariate white noise model for lambda_t
+model.uwn=list(Z=Z, R=R, A=A, B=B, Q=Q, U=U, x0=x0, V0=V0)
+tmp=MARSS(dat[2:TT], model=model.uwn)
+```
+
