@@ -1,0 +1,107 @@
+# Speeding up MARSS and allowing larger matrices
+
+date: May 3, 2018
+
+Problem:
+
+1. MARSS is slow in part due to native R
+2. MARSS is very slow with large matrices
+
+I am working on an update to MARSS to allow sparse matrices to allow larger datasets to be used and Rcpp integration to speed up large matrix math.
+
+Install current version of MARSS into one location.
+```{r, , message=FALSE, warning=FALSE, eval=FALSE}
+library(devtools)
+withr::with_libpaths(.libPaths()[2], install_github("nwfsc-timeseries/MARSS@*release"))
+```
+
+Install Matrix branch of MARSS into one location.
+```{r, , message=FALSE, warning=FALSE, eval=FALSE}
+library(devtools)
+withr::with_libpaths(.libPaths()[1], install_github("nwfsc-timeseries/MARSS", ref="Matrix"))
+```
+
+Functions to fit models.
+```{r, results="hide"}
+fit.vs9=function(n,TT){
+library(MARSS, lib.loc=.libPaths()[2])
+set.seed(111)
+a = matrix(rnorm(n*TT),n,TT)
+kemfit=MARSS(a, control=list(maxit=20), fun.kf="MARSSkfss", silent=TRUE, fit=FALSE)
+tmp=MARSSkem(kemfit)
+detach("package:MARSS", unload=TRUE)
+return(tmp)
+}
+
+fit.Matrix=function(n,TT){
+library(MARSS, lib.loc=.libPaths()[1])
+set.seed(111)
+a = matrix(rnorm(n*TT),n,TT)
+isMatrix=TRUE # for now I use a flag to denote to use sparse Matrix
+kemfit=MARSS(a, control=list(maxit=20), fun.kf="MARSSkfss", silent=TRUE, fit=FALSE)
+tmp=MARSSkem(kemfit)
+detach("package:MARSS", unload=TRUE)
+return(tmp)
+}
+```
+
+Now benchmark. This takes awhile
+```{r, eval=FALSE}
+library(microbenchmark)
+microbenchmark(fit.vr9(75,20), fit.Matrix(75,20))
+microbenchmark(fit.vr9(100,20), fit.Matrix(100,20))
+microbenchmark(fit.vr9(200,20), fit.Matrix(200,20))
+```
+
+Looks similar but the difference is in the MARSSkem() and memory.  The set-up has not been optimized for Matrix form yet and takes much longer.  You can see this best with the Rstudio profiler.
+```{r, eval=FALSE}
+library(profvis)
+profvis({ tmp=fit.Matrix(100,20) })
+profvis({ tmp=fit.vs9(100,20) })
+```
+
+Time is 17.5 sec (Matrix) versus 16.8 sec (vs 9). But memory is 6G vs 10.8G.  The MARSSkem
+part is 8.8 sec vs 12 sec, but that is from the C++ speeds ups and will be transferred to the non-Matrix version too.  Object sizes are much smaller for the Matrix version, 18M vs 0.33M. 
+
+With 200x20 matrix, the differences are greater.  97 sec vs 182 sec.
+
+## Status May 4, 2018
+
+Unfortunately, I have managed to slow small fit down by 3-10x!
+
+```{r, eval=FALSE}
+fit1=function(fun.kf="MARSSkfas"){
+  if(require(MARSS, quietly=TRUE)) detach("package:MARSS", unload=TRUE)
+  library(MARSS, lib.loc=.libPaths()[2], quietly=TRUE)
+  dat <- t(harborSealWA)
+  dat <- dat[2:4,] #remove the year row
+  #fit a model with 1 hidden state and 3 observation time series
+  kemfit <- MARSS(dat, model=list(Z=matrix(1,3,1), 
+                                  R="diagonal and equal"), fun.kf=fun.kf, silent=TRUE)
+  tmp=packageVersion("MARSS")
+  detach("package:MARSS", unload=TRUE)
+  return(list(version=tmp, fit=kemfit))
+}
+
+fit2=function(fun.kf="MARSSkfas", isMatrix=FALSE){
+  if(require(MARSS, quietly=TRUE)) detach("package:MARSS", unload=TRUE)
+  library(MARSS, lib.loc=.libPaths()[1], quietly=TRUE)
+  dat <- t(harborSealWA)
+  dat <- dat[2:4,] #remove the year row
+  #fit a model with 1 hidden state and 3 observation time series
+  kemfit <- MARSS(dat, model=list(Z=matrix(1,3,1), 
+                                  R="diagonal and equal"), fun.kf=fun.kf, silent=TRUE)
+  tmp=packageVersion("MARSS")
+  detach("package:MARSS", unload=TRUE)
+  return(list(version=tmp, fit=kemfit))
+}
+```
+
+Benchmark results
+```{r, eval=FALSE}
+library(microbenchmark)
+microbenchmark(fit1(), fit2(), fit2(isMatrix=TRUE), fit1(fun.kf="MARSSkfss"), fit2(fun.kf="MARSSkfss"), fit2(fun.kf="MARSSkfss", 
+isMatrix=TRUE), times=1)
+```
+
+```

@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
+<link rel="prev" href="time-varying-population-growth-rates-univariate.html">
 
-<link rel="next" href="math-and-eqn-numbering.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -210,40 +210,62 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     } 
   });
 </script>
-<div id="header">
-<h1 class="title">MARSS wiki</h1>
-</div>
-<div id="readme" class="section level1">
-<h1><span class="header-section-number">1</span> ReadMe</h1>
-<div id="contribute" class="section level2">
-<h2><span class="header-section-number">1.1</span> Contribute</h2>
+<div id="speeding-up-marss-and-allowing-larger-matrices" class="section level1">
+<h1><span class="header-section-number">6</span> Speeding up MARSS and allowing larger matrices</h1>
+<p>date: May 3, 2018</p>
+<p>Problem:</p>
 <ol style="list-style-type: decimal">
-<li>Write an Rmd file.</li>
-<li>Go to <a href="https://github.com/nwfsc-timeseries/MARSS-wiki/tree/master/rmdfiles">rmdfiles folder</a></li>
-<li>Click on <code>Upload files</code></li>
-<li>Select ‘Create new branch and start a pull request’</li>
+<li>MARSS is slow in part due to native R</li>
+<li>MARSS is very slow with large matrices</li>
 </ol>
-<p>Each Rmd file contains one and only one entry/vignette. The title of your vignette must be at the top of your Rmd and have <code>#</code> (chapter level). Subsequent headings should be <code>##</code>. Don’t add yaml to the top of your Rmd. Look at an existing Rmd in the folder for an example. You can write math in normal LaTeX, but you need to escape the equation ref (so looks like <code>\\ref{}</code>).</p>
-<p>You can also post at the wiki associated with the MARSS repo, but then it’ll just be raw R or Rmd code. <a href="https://github.com/nwfsc-timeseries/MARSS/wiki">MARSS simple wiki</a></p>
-</div>
-<div id="downloading-the-rmds" class="section level2">
-<h2><span class="header-section-number">1.2</span> Downloading the Rmds</h2>
-<ul>
-<li>Move mouse up to header of the example you want to download.</li>
-<li>Click on the “pencil” icon to take you to GitHub.</li>
-<li>In the top right, RIGHT click on <code>Raw</code> button.</li>
-<li>Save as …</li>
-</ul>
+<p>I am working on an update to MARSS to allow sparse matrices to allow larger datasets to be used and Rcpp integration to speed up large matrix math.</p>
+<p>Install current version of MARSS into one location.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(devtools)
+withr<span class="op">::</span><span class="kw">with_libpaths</span>(<span class="kw">.libPaths</span>()[<span class="dv">2</span>], <span class="kw">install_github</span>(<span class="st">&quot;nwfsc-timeseries/MARSS@*release&quot;</span>))</code></pre></div>
+<p>Install Matrix branch of MARSS into one location.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(devtools)
+withr<span class="op">::</span><span class="kw">with_libpaths</span>(<span class="kw">.libPaths</span>()[<span class="dv">1</span>], <span class="kw">install_github</span>(<span class="st">&quot;nwfsc-timeseries/MARSS&quot;</span>, <span class="dt">ref=</span><span class="st">&quot;Matrix&quot;</span>))</code></pre></div>
+<p>Functions to fit models.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit.vs9=<span class="cf">function</span>(n,TT){
+<span class="kw">library</span>(MARSS, <span class="dt">lib.loc=</span><span class="kw">.libPaths</span>()[<span class="dv">2</span>])
+<span class="kw">set.seed</span>(<span class="dv">111</span>)
+a =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span>TT),n,TT)
+kemfit=<span class="kw">MARSS</span>(a, <span class="dt">control=</span><span class="kw">list</span>(<span class="dt">maxit=</span><span class="dv">20</span>), <span class="dt">fun.kf=</span><span class="st">&quot;MARSSkfss&quot;</span>, <span class="dt">silent=</span><span class="ot">TRUE</span>, <span class="dt">fit=</span><span class="ot">FALSE</span>)
+tmp=<span class="kw">MARSSkem</span>(kemfit)
+<span class="kw">detach</span>(<span class="st">&quot;package:MARSS&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)
+<span class="kw">return</span>(tmp)
+}
 
-</div>
+fit.Matrix=<span class="cf">function</span>(n,TT){
+<span class="kw">library</span>(MARSS, <span class="dt">lib.loc=</span><span class="kw">.libPaths</span>()[<span class="dv">1</span>])
+<span class="kw">set.seed</span>(<span class="dv">111</span>)
+a =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span>TT),n,TT)
+isMatrix=<span class="ot">TRUE</span> <span class="co"># for now I use a flag to denote to use sparse Matrix</span>
+kemfit=<span class="kw">MARSS</span>(a, <span class="dt">control=</span><span class="kw">list</span>(<span class="dt">maxit=</span><span class="dv">20</span>), <span class="dt">fun.kf=</span><span class="st">&quot;MARSSkfss&quot;</span>, <span class="dt">silent=</span><span class="ot">TRUE</span>, <span class="dt">fit=</span><span class="ot">FALSE</span>)
+tmp=<span class="kw">MARSSkem</span>(kemfit)
+<span class="kw">detach</span>(<span class="st">&quot;package:MARSS&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)
+<span class="kw">return</span>(tmp)
+}</code></pre></div>
+<p>Now benchmark. This takes awhile</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(microbenchmark)
+<span class="kw">microbenchmark</span>(<span class="kw">fit.vr9</span>(<span class="dv">75</span>,<span class="dv">20</span>), <span class="kw">fit.Matrix</span>(<span class="dv">75</span>,<span class="dv">20</span>))
+<span class="kw">microbenchmark</span>(<span class="kw">fit.vr9</span>(<span class="dv">100</span>,<span class="dv">20</span>), <span class="kw">fit.Matrix</span>(<span class="dv">100</span>,<span class="dv">20</span>))
+<span class="kw">microbenchmark</span>(<span class="kw">fit.vr9</span>(<span class="dv">200</span>,<span class="dv">20</span>), <span class="kw">fit.Matrix</span>(<span class="dv">200</span>,<span class="dv">20</span>))</code></pre></div>
+<p>Looks similar but the difference is in the MARSSkem() and memory. The set-up has not been optimized for Matrix form yet and takes much longer. You can see this best with the Rstudio profiler.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(profvis)
+<span class="kw">profvis</span>({ tmp=<span class="kw">fit.Matrix</span>(<span class="dv">100</span>,<span class="dv">20</span>) })
+<span class="kw">profvis</span>({ tmp=<span class="kw">fit.vs9</span>(<span class="dv">100</span>,<span class="dv">20</span>) })</code></pre></div>
+<p>Time is 17.5 sec (Matrix) versus 16.8 sec (vs 9). But memory is 6G vs 10.8G. The MARSSkem part is 8.8 sec vs 12 sec, but that is from the C++ speeds ups and will be transferred to the non-Matrix version too. Object sizes are much smaller for the Matrix version, 18M vs 0.33M.</p>
+<p>With 200x20 matrix, the differences are greater. 97 sec vs 182 sec.</p>
+
 </div>
             </section>
 
           </div>
         </div>
       </div>
+<a href="time-varying-population-growth-rates-univariate.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="math-and-eqn-numbering.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -273,7 +295,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/index.Rmd",
+"link": "https://github.com/nwfsc-timeseries/MARSS-wiki/edit/master/rmdfiles/04-Matrix-Rcpp-update.Rmd",
 "text": "Edit"
 },
 "download": null,

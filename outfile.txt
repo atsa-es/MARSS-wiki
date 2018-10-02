@@ -1,0 +1,7 @@
+sample.interval=20000
+"getClassDef" "getClass" "new" "spV2M" "dim<-" "dim<-" "subFree2D" "vparmat2" "parmat" "MARSSkfss" 
+"standardGeneric" "unname" "MARSSkfss" 
+"base::chol2inv" "chol2inv" "chol2inv" "pcholinv" "MARSSkfss" 
+"unname" "MARSSkfss" 
+"unname" "MARSSkfss" 
+"unname" "MARSSkfss" 
